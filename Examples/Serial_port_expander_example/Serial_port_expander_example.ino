@@ -96,6 +96,7 @@ void print_reading(Ezo_uart &Module) {                //takes a reference to a M
     Serial.print(Module.get_name());                  //prints the module's name
     Serial.print(": ");
     Serial.print(Module.get_reading());               //prints the reading we obtained
+    Serial.print("    ");
   }
 }
 
