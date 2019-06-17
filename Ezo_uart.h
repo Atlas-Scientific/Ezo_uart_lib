@@ -1,3 +1,22 @@
+/*
+MIT License
+Copyright (c) 2019 Atlas Scientific
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE
+*/
 
 #ifndef _EZO_UART_H_
 #define _EZO_UART_H_
@@ -19,7 +38,7 @@ class Ezo_uart{
 		//takes a stream object, which is usually a hardware or software serial port and a name string
 		
 		bool send_read();
-		//sends the "R" command to the sensor and parses the response so its
+		//sends the "R" command to the device and parses the response so its
 		//accessible as a float with the get_reading() function
 		//this function blocks until a reading is received
 		
@@ -49,7 +68,7 @@ class Ezo_uart{
 		//also useful to receive data from a module thats in continuous mode
 	
 		float get_reading();		
-		//returns the last reading the sensor received as a float
+		//returns the last reading the device received as a float
 
 		const char* get_name();		
 		//returns a pointer to the name string		
