@@ -59,9 +59,5 @@ void flush_rx_buffer();
 uint8_t data_available();
 //a passthrough for the serial port's available() function
 
-private:
-float reading = 0;
-const char* name;
-Stream& Serial_port;
-const static uint8_t bufferlen = 32;
+
 ```
