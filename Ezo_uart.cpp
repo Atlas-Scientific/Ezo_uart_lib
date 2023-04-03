@@ -65,7 +65,7 @@ uint8_t Ezo_uart::send_cmd(const String& cmd, char * sensordata_buffer, uint8_t 
 
 uint8_t  Ezo_uart::send_cmd_with_num(const char* cmd, char * sensordata_buffer, 
 										const uint8_t buffer_len, float num, uint8_t decimal_amount){
-	String temp = String(cmd )+ String(num, decimal_amount);
+	String temp = String(cmd )+ String(num, (unsigned int)decimal_amount);
 	const char* pointer = temp.c_str();
 	return send_cmd(pointer,sensordata_buffer,buffer_len);
 }
