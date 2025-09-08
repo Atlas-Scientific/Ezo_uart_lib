@@ -1,4 +1,4 @@
-//An example of polling multiple circuits using the Arduin Mega's multiple serial ports
+//An example of polling multiple circuits using the Arduino Mega's multiple serial ports
 //This code works similarly to the serial port expander sample code in terms of the interface
 //but constantly polls all the circuits by default
 //To open a channel send the number of the channel followed by a colon and the command (if any) that you want to send. End the string with a carriage return.
@@ -16,8 +16,6 @@ const uint8_t bufferlen = 32;                         //total buffer size for th
 char response_data[bufferlen];                        //character array to hold the response data from modules
 String inputstring = "";                              //a string to hold incoming data from the PC
 
-uint8_t index = 0;
-
 // create objects to represent the Modules you're connecting to
 // they can accept hardware or software serial ports, and a name of your choice
 Ezo_uart Module1(Serial1, "DO");
@@ -29,6 +27,31 @@ const uint8_t module_count = 3;                       //total size fo the Module
 Ezo_uart Modules[module_count] = {                    //create an array to hold all the modules
   Module1, Module2, Module3
 };
+
+uint8_t module_index = 0;
+
+uint8_t parse_input(String &inputstring) {                 //this function will decode the string (example 4:cal,1413)
+  int colon = inputstring.indexOf(':');                  //find the location of the colon in the string
+  if ( colon > 0) {                                       //if we found a colon
+    String port_as_string = inputstring.substring(0, colon);  //extract the port number from the string and store it here
+    inputstring = inputstring.substring(colon + 1);    //extract the message from the string and store it here
+    return port_as_string.toInt();                     //convert the port number from a string to an int
+  }
+  else {                                              //if theres no colon
+    return module_index;                                      //return the current port and dont modify the input string
+  }
+}
+
+void print_reading(Ezo_uart &Module) {                //takes a reference to a Module
+  //send_read() sends the read command to the module then converts the 
+  //answer to a float which can be retrieved with get_reading()
+  //it returns a bool indicating if the reading was obtained successfully
+  if (Module.send_read()) {                           
+    Serial.print(Module.get_name());                  //prints the module's name
+    Serial.print(": ");
+    Serial.print(Module.get_reading());               //prints the reading we obtained
+  }
+}
 
 void setup() {
   Serial.begin(9600);                                 //Set the hardware serial port to 9600
@@ -52,20 +75,34 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {                       //if we get data from the computer
     inputstring = Serial.readStringUntil(13);         //receive it until the carraige return delimiter
-    index = parse_input(inputstring);                  //parse the data to either switch ports or send it to the circuit
+    module_index = parse_input(inputstring);                  //parse the data to either switch ports or send it to the circuit
     
+    if(module_count < module_index ){
+      module_index = module_count - 1;
+    }
+
     if (inputstring != "") {                          //if we have a command for the modules
-      Modules[index].send_cmd(inputstring, response_data, bufferlen); // send it to the module of the port we opened
-      Serial.print(index);                             //print the modules port
+      Modules[module_index].send_cmd(inputstring, response_data, bufferlen); // send it to the module of the port we opened
+      Serial.print(module_index);                             //print the modules port
       Serial.print("-");
-      Serial.print(Modules[index].get_name());     //print the modules name
+      Serial.print(Modules[module_index].get_name());     //print the modules name
       Serial.print(": ");
       Serial.println(response_data);                  //print the modules response
-      response_data[0] = 0;                           //clear the modules response
+      //response_data[0] = 0;                           //clear the modules response
+      memset(response_data, 0, bufferlen);
+      Modules[module_index].flush_rx_buffer();
     }
     else {
       Serial.print("Index is set to ");                //if were not sending a command, print the port
-      Serial.println(index);
+      Serial.println(module_index);
+      Modules[module_index].flush_rx_buffer();
+    }
+  }
+
+  for (uint8_t i = 0; i < module_count; i++) {
+    if(Modules[i].data_available()){
+      Modules[i].receive_cmd(response_data, bufferlen);
+      Serial.println(response_data);
     }
   }
 
@@ -76,26 +113,7 @@ void loop() {
   Serial.println();
 }
 
-void print_reading(Ezo_uart &Module) {                //takes a reference to a Module
-  //send_read() sends the read command to the module then converts the 
-  //answer to a float which can be retrieved with get_reading()
-  //it returns a bool indicating if the reading was obtained successfully
-  if (Module.send_read()) {                           
-    Serial.print(Module.get_name());                  //prints the module's name
-    Serial.print(": ");
-    Serial.print(Module.get_reading());               //prints the reading we obtained
-  }
-}
 
 
-uint8_t parse_input(String &inputstring) {                 //this function will decode the string (example 4:cal,1413)
-  int colon = inputstring.indexOf(':');                  //find the location of the colon in the string
-  if ( colon > 0) {                                       //if we found a colon
-    String port_as_string = inputstring.substring(0, colon);  //extract the port number from the string and store it here
-    inputstring = inputstring.substring(colon + 1);    //extract the message from the string and store it here
-    return port_as_string.toInt();                     //convert the port number from a string to an int
-  }
-  else {                                              //if theres no colon
-    return index;                                      //return the current port and dont modify the input string
-  }
-}
+
+
